@@ -46,7 +46,7 @@ Durante las siguientes versiones se desarrollarán:
 
 ## Versión actual
 
-v0.4.0 — Modelo Banco y reglas del dominio bancario.
+v0.5.0 — Persistencia con LocalStorage y StorageService.
 
 ## Modelo Banco
 
@@ -90,6 +90,64 @@ Este método permite:
 - Evitar cuentas duplicadas.
 - Rechazar depósitos con montos inválidos.
 - Rechazar depósitos en cuentas inexistentes.
+
+## Persistencia con LocalStorage
+
+A partir de v0.5.0, el Sistema de Gestión Bancaria
+permite guardar y recuperar información del banco
+utilizando LocalStorage.
+
+### Servicio de almacenamiento
+
+Archivo: js/services/StorageService.js
+
+Métodos implementados:
+
+- guardar(): almacena información.
+- obtener(): recupera información almacenada.
+- eliminar(): elimina una clave específica.
+- limpiar(): elimina las claves del origen.
+
+### Datos almacenados
+
+El sistema utiliza las siguientes claves:
+
+- usuarios
+- cuentas
+- movimientos
+- sesion (reservada para versiones posteriores)
+
+### Serialización
+
+JSON.stringify() convierte objetos JavaScript
+en texto JSON.
+
+JSON.parse() recupera los datos almacenados.
+
+### Reconstrucción de instancias
+
+Después de recuperar la información, el sistema
+reconstruye los objetos utilizando:
+
+- new Usuario()
+- new Cuenta()
+- new Movimiento()
+
+Esto permite conservar los métodos definidos
+en las clases.
+
+### Pruebas realizadas
+
+- Recuperación de usuarios.
+- Recuperación de cuentas.
+- Recuperación de movimientos.
+- Persistencia del saldo.
+- Reconstrucción de instancias.
+- Conservación de métodos de Cuenta.
+- Validación de datos después de recargar Chrome.
+
+Nota: proyecto educativo con información ficticia.
+No utilizar contraseñas reales en LocalStorage.
 
 ## Historial de versiones
 
