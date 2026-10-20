@@ -46,55 +46,54 @@ Durante las siguientes versiones se desarrollarán:
 
 ## Versión actual
 
-v0.3.0 — Programación Orientada a Objetos y modelos bancarios.
+v0.4.0 — Modelo Banco y reglas del dominio bancario.
 
-## Modelos implementados
+## Modelo Banco
 
-### Usuario.js
+Archivo: js/models/Banco.js
 
-Representa a un usuario del sistema bancario.
+La clase Banco coordina usuarios, cuentas y movimientos bancarios.
 
-Propiedades:
+### Gestión de usuarios
 
-- id
-- nombre
-- email
-- telefono
-- password (solo demostración educativa)
+- agregarUsuario()
+- buscarUsuarioPorId()
 
-### Cuenta.js
+### Gestión de cuentas
 
-Representa una cuenta bancaria.
+- agregarCuenta()
+- buscarCuentaPorId()
+- buscarCuentaPorNumero()
+- obtenerCuentasDeUsuario()
 
-Propiedades:
+### Gestión de movimientos
 
-- id
-- numeroCuenta
-- usuarioId
-- saldo
+- registrarMovimiento()
+- obtenerMovimientosDeCuenta()
 
-Métodos:
+### Operaciones bancarias
 
-- depositar()
-- retirar()
+- realizarDeposito()
 
-### Movimiento.js
+Este método permite:
 
-Representa un movimiento bancario.
+1. Validar el monto.
+2. Buscar la cuenta bancaria.
+3. Actualizar el saldo.
+4. Crear automáticamente un movimiento.
+5. Registrar el movimiento en el historial.
 
-Propiedades:
+### Reglas implementadas
 
-- id
-- tipo
-- monto
-- descripcion
-- cuentaOrigen
-- cuentaDestino
-- saldoResultante
-- fecha
+- Evitar usuarios con identificadores duplicados.
+- Impedir cuentas sin propietario registrado.
+- Evitar cuentas duplicadas.
+- Rechazar depósitos con montos inválidos.
+- Rechazar depósitos en cuentas inexistentes.
 
 ## Historial de versiones
 
 - v0.1.0 — Estructura inicial del proyecto.
 - v0.2.0 — Arquitectura modular y utilidades base.
 - v0.3.0 — Modelos Usuario, Cuenta y Movimiento.
+- v0.4.0 — Modelo Banco y reglas del dominio bancario.

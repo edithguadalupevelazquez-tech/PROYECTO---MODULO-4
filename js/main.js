@@ -20,11 +20,11 @@ import { Usuario } from "./models/Usuario.js";
 
 import { Cuenta } from "./models/Cuenta.js";
 
-import { Movimiento } from "./models/Movimiento.js";
+import { Banco } from "./models/Banco.js";
 
 //PUNTO DE ENTRADA DE LA APLICACIÓN
 
-console.log("Sistema de Gestión Bancaria - v0.3.0");
+console.log("Sistema de Gestión Bancaria - v0.4.0");
 
 // Probar campo obligatorio
 console.log("Campo obligatorio:", validarCampoObligatorio("Banco Digital"));
@@ -44,11 +44,23 @@ console.log("Fecha formateada:", formatDate(new Date()));
 // Formatear número de cuenta
 console.log("Número de cuenta:", formatAccountNumber("123456789012"));
 
-// PRUEBA DE PROGRAMACIÓN ORIENTADA A OBJETOS
+/* =========================================
+   PRUEBA DEL MODELO BANCO
+   VERSION v0.4.0
+========================================= */
 
-console.log("Sistema de Gestión Bancaria - POO v0.3.0");
+console.log("Sistema de Gestión Bancaria - POO v0.4.0");
 
-// Crear usuario de prueba
+/* =========================================
+   CREAR BANCO
+========================================= */
+
+const bancoDemo = new Banco();
+
+/* =========================================
+   CREAR USUARIO
+========================================= */
+
 const usuarioDemo = new Usuario({
   nombre: "Ana López",
   email: "ana@ejemplo.com",
@@ -56,35 +68,70 @@ const usuarioDemo = new Usuario({
   password: "123456",
 });
 
-console.log("Usuario creado:", usuarioDemo);
+// Registrar usuario mediante Banco
+bancoDemo.agregarUsuario(usuarioDemo);
 
-//CREAR CUENTA BANCARIA
+console.log("Usuarios registrados:", bancoDemo.usuarios.length);
+
+/* =========================================
+   CREAR CUENTA
+========================================= */
 
 const cuentaDemo = new Cuenta({
   numeroCuenta: "123456789012",
   usuarioId: usuarioDemo.id,
 });
 
-console.log("Cuenta creada:", cuentaDemo);
+// Registrar cuenta mediante Banco
+bancoDemo.agregarCuenta(cuentaDemo);
 
-// REALIZAR DEPÓSITO
+console.log("Cuentas registradas:", bancoDemo.cuentas.length);
 
-// Primero depositamos el dinero
-cuentaDemo.depositar(1000);
+/* =========================================
+   REALIZAR DEPÓSITO
+========================================= */
 
-// Comprobamos el nuevo saldo
-console.log("Saldo después del depósito:", formatCurrency(cuentaDemo.saldo));
-
-// REGISTRAR MOVIMIENTO
-
-// Después del depósito creamos el movimiento
-const movimientoDemo = new Movimiento({
-  tipo: "DEPOSITO",
+const depositoDemo = bancoDemo.realizarDeposito({
+  cuentaId: cuentaDemo.id,
   monto: 1000,
   descripcion: "Depósito inicial",
-  cuentaOrigen: cuentaDemo.id,
-  saldoResultante: cuentaDemo.saldo,
 });
 
-// Mostrar movimiento generado
-console.log("Movimiento generado:", movimientoDemo);
+/* =========================================
+   MOSTRAR RESULTADOS
+========================================= */
+
+console.log("Saldo actual:", formatCurrency(cuentaDemo.saldo));
+
+console.log("Movimiento generado:", depositoDemo);
+
+console.log("Movimientos registrados:", bancoDemo.movimientos.length);
+
+/* =========================================
+   BUSCAR USUARIO
+========================================= */
+
+const usuarioEncontrado = bancoDemo.buscarUsuarioPorId(usuarioDemo.id);
+
+console.log("Usuario encontrado:", usuarioEncontrado.nombre);
+
+/* =========================================
+   OBTENER CUENTAS DEL USUARIO
+========================================= */
+
+const cuentasUsuario = bancoDemo.obtenerCuentasDeUsuario(usuarioDemo.id);
+
+console.log("Cuentas del usuario:", cuentasUsuario.length);
+
+/* =========================================
+   PROBAR ERROR CONTROLADO
+========================================= */
+
+try {
+  bancoDemo.realizarDeposito({
+    cuentaId: cuentaDemo.id,
+    monto: -500,
+  });
+} catch (error) {
+  console.log("Error controlado:", error.message);
+}
