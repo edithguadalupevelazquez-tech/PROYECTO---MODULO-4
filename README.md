@@ -46,32 +46,55 @@ Durante las siguientes versiones se desarrollarán:
 
 ## Versión actual
 
-v0.2.0 — Arquitectura modular y utilidades base.
+v0.3.0 — Programación Orientada a Objetos y modelos bancarios.
 
-## Utilidades implementadas
+## Modelos implementados
 
-### Validadores
+### Usuario.js
 
-Archivo: js/utils/validators.js
+Representa a un usuario del sistema bancario.
 
-- validarCampoObligatorio(): comprueba que un campo tenga información.
-- validarMonto(): comprueba que un monto sea numérico, finito y positivo.
+Propiedades:
 
-### Funciones auxiliares
+- id
+- nombre
+- email
+- telefono
+- password (solo demostración educativa)
 
-Archivo: js/utils/helpers.js
+### Cuenta.js
 
-- generarId(): genera identificadores para los registros del sistema.
+Representa una cuenta bancaria.
 
-### Formateadores
+Propiedades:
 
-Archivo: js/utils/formatters.js
+- id
+- numeroCuenta
+- usuarioId
+- saldo
 
-- formatCurrency(): convierte valores a formato monetario MXN.
-- formatDate(): presenta fechas en formato regional mexicano.
-- formatAccountNumber(): separa números de cuenta en grupos de cuatro dígitos.
+Métodos:
+
+- depositar()
+- retirar()
+
+### Movimiento.js
+
+Representa un movimiento bancario.
+
+Propiedades:
+
+- id
+- tipo
+- monto
+- descripcion
+- cuentaOrigen
+- cuentaDestino
+- saldoResultante
+- fecha
 
 ## Historial de versiones
 
 - v0.1.0 — Estructura inicial del proyecto.
 - v0.2.0 — Arquitectura modular y utilidades base.
+- v0.3.0 — Modelos Usuario, Cuenta y Movimiento.
