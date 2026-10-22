@@ -3,6 +3,7 @@
 ========================================= */
 
 import { Movimiento } from "./Movimiento.js";
+import { validarMontoMonetario } from "../utils/validators.js";
 
 /* =========================================
    MODELO BANCO
@@ -117,12 +118,16 @@ export class Banco {
 
   realizarDeposito({ cuentaId, monto, descripcion = "" }) {
     // Convertir el monto a número
-    const montoNumerico = Number(monto);
 
-    // Validar que sea positivo y finito
-    if (!Number.isFinite(montoNumerico) || montoNumerico <= 0) {
-      throw new Error("Monto inválido, el monto debe ser mayor a cero.");
+    // Validar el monto con la regla monetaria compartida
+    if (!validarMontoMonetario(monto)) {
+      throw new Error(
+        "Monto inválido. Debe ser positivo y tener máximo dos decimales.",
+      );
     }
+
+    // Convertir el monto validado a número
+    const montoNumerico = Number(monto);
 
     // Buscar la cuenta
     const cuenta = this.buscarCuentaPorId(cuentaId);
@@ -131,23 +136,245 @@ export class Banco {
       throw new Error("La cuenta no existe.");
     }
 
-    // Actualizar saldo
-    cuenta.depositar(montoNumerico);
+    /* =========================================
+       DEPÓSITO CON RECUPERACIÓN
+       Sistema de Gestión Bancaria v0.9.0
+    ========================================= */
 
-    // Crear movimiento automáticamente
-    const movimiento = new Movimiento({
-      tipo: "DEPOSITO",
-      monto: montoNumerico,
-      descripcion,
-      cuentaOrigen: cuenta.id,
-      saldoResultante: cuenta.saldo,
-    });
+    // Conservar el saldo original
+    const saldoOriginal = cuenta.saldo;
 
-    // Registrar movimiento
-    this.registrarMovimiento(movimiento);
+    // Conservar el historial original
+    const movimientosOriginales = [...this.movimientos];
 
-    return movimiento;
+    try {
+      // Actualizar el saldo
+      cuenta.depositar(montoNumerico);
+
+      // Crear el movimiento del depósito
+      const movimiento = new Movimiento({
+        tipo: "DEPOSITO",
+        monto: montoNumerico,
+        descripcion,
+        cuentaOrigen: cuenta.id,
+        saldoResultante: cuenta.saldo,
+      });
+
+      // Registrar el movimiento
+      this.registrarMovimiento(movimiento);
+
+      // Devolver el movimiento registrado
+      return movimiento;
+    } catch (error) {
+      // Restaurar el saldo anterior
+      cuenta.saldo = saldoOriginal;
+
+      // Restaurar el historial anterior
+      this.movimientos.splice(
+        0,
+        this.movimientos.length,
+        ...movimientosOriginales,
+      );
+
+      // Propagar el error original
+      throw error;
+    }
   }
+
+  /* =========================================
+     REALIZAR TRANSFERENCIA
+     Sistema de Gestión Bancaria v0.9.0
+  ========================================= */
+
+  realizarTransferencia({
+    cuentaOrigenId,
+    cuentaDestinoId,
+    monto,
+    descripcion = "",
+  }) {
+    /* =========================================
+       VALIDAR MONTO DE TRANSFERENCIA
+    ========================================= */
+
+    // Validar el monto con la regla monetaria compartida
+    if (!validarMontoMonetario(monto)) {
+      throw new Error(
+        "Monto inválido. Debe ser positivo y tener máximo dos decimales.",
+      );
+    }
+
+    // Convertir el monto validado a número
+    const montoNumerico = Number(monto);
+
+    /* =========================================
+       BUSCAR CUENTAS DE TRANSFERENCIA
+    ========================================= */
+
+    // Buscar la cuenta que enviará el dinero
+    const origen = this.buscarCuentaPorId(cuentaOrigenId);
+
+    // Buscar la cuenta que recibirá el dinero
+    const destino = this.buscarCuentaPorId(cuentaDestinoId);
+
+    /* =========================================
+       VALIDAR EXISTENCIA DE LAS CUENTAS
+    ========================================= */
+
+    // Comprobar que exista la cuenta origen
+    if (!origen) {
+      throw new Error("La cuenta origen no existe.");
+    }
+
+    // Comprobar que exista la cuenta destino
+    if (!destino) {
+      throw new Error("La cuenta destino no existe.");
+    }
+
+    /* =========================================
+       VALIDAR CUENTAS ACTIVAS
+       Sistema de Gestión Bancaria v0.9.0
+    ========================================= */
+
+    // Comprobar que la cuenta origen esté activa
+    if (!origen.activa) {
+      throw new Error("La cuenta origen no está activa.");
+    }
+
+    // Comprobar que la cuenta destino esté activa
+    if (!destino.activa) {
+      throw new Error("La cuenta destino no está activa.");
+    }
+
+    /* =========================================
+       EVITAR TRANSFERENCIA A LA MISMA CUENTA
+    ========================================= */
+
+    // Comparar los identificadores de ambas cuentas
+    if (origen.id === destino.id) {
+      throw new Error("No puedes transferir dinero a la misma cuenta.");
+    }
+
+    /* =========================================
+       VALIDAR SALDO SUFICIENTE
+       Sistema de Gestión Bancaria v0.9.0
+    ========================================= */
+
+    // Comprobar que el saldo sea válido
+    const saldoDisponible = Number(origen.saldo);
+
+    if (!Number.isFinite(saldoDisponible) || saldoDisponible < 0) {
+      throw new Error("El saldo de la cuenta origen es inválido.");
+    }
+
+    // Impedir transferir más dinero del disponible
+    if (saldoDisponible < montoNumerico) {
+      throw new Error("Saldo insuficiente.");
+    }
+
+    /* =========================================
+       VALIDAR SALDO DE LA CUENTA DESTINO
+       Sistema de Gestión Bancaria v0.9.0
+    ========================================= */
+
+    // Convertir el saldo destino a número
+    const saldoDestino = Number(destino.saldo);
+
+    // Comprobar que el saldo destino sea válido
+    if (!Number.isFinite(saldoDestino) || saldoDestino < 0) {
+      throw new Error("El saldo de la cuenta destino es inválido.");
+    }
+
+    /* =========================================
+       VALIDAR SALDOS RESULTANTES
+       Sistema de Gestión Bancaria v0.9.0
+    ========================================= */
+
+    // Calcular los saldos antes de modificarlos
+    const nuevoSaldoOrigen = saldoDisponible - montoNumerico;
+
+    const nuevoSaldoDestino = saldoDestino + montoNumerico;
+
+    // Comprobar que los resultados sean válidos
+    if (
+      !Number.isFinite(nuevoSaldoOrigen) ||
+      !Number.isFinite(nuevoSaldoDestino) ||
+      nuevoSaldoOrigen < 0
+    ) {
+      throw new Error("La transferencia produciría saldos inválidos.");
+    }
+
+    /* =========================================
+       RESPALDAR SALDOS ANTES DE TRANSFERIR
+       Sistema de Gestión Bancaria v0.9.0
+    ========================================= */
+
+    // Conservar los saldos anteriores
+    const saldoOriginalOrigen = origen.saldo;
+
+    const saldoOriginalDestino = destino.saldo;
+
+    /* =========================================
+       EJECUTAR TRANSFERENCIA
+    ========================================= */
+
+    /* =========================================
+       EJECUTAR Y REGISTRAR TRANSFERENCIA
+       Sistema de Gestión Bancaria v0.9.0
+    ========================================= */
+
+    // Guardar la cantidad inicial de movimientos
+    const totalMovimientosOriginal = this.movimientos.length;
+
+    try {
+      // Retirar dinero de la cuenta origen
+      origen.retirar(montoNumerico);
+
+      // Depositar dinero en la cuenta destino
+      destino.depositar(montoNumerico);
+
+      // Crear movimiento enviado
+      const movimientoEnviado = new Movimiento({
+        tipo: "TRANSFERENCIA_ENVIADA",
+        monto: montoNumerico,
+        descripcion,
+        cuentaOrigen: origen.id,
+        cuentaDestino: destino.id,
+        saldoResultante: origen.saldo,
+      });
+
+      // Crear movimiento recibido
+      const movimientoRecibido = new Movimiento({
+        tipo: "TRANSFERENCIA_RECIBIDA",
+        monto: montoNumerico,
+        descripcion,
+        cuentaOrigen: origen.id,
+        cuentaDestino: destino.id,
+        saldoResultante: destino.saldo,
+      });
+
+      // Registrar ambos movimientos
+      this.registrarMovimiento(movimientoEnviado);
+      this.registrarMovimiento(movimientoRecibido);
+
+      // Devolver el resultado de la transferencia
+      return {
+        origen,
+        destino,
+        movimientoEnviado,
+        movimientoRecibido,
+      };
+    } catch (error) {
+      // Restaurar los saldos originales
+      origen.saldo = saldoOriginalOrigen;
+      destino.saldo = saldoOriginalDestino;
+
+      // Eliminar movimientos añadidos durante el intento
+      this.movimientos.length = totalMovimientosOriginal;
+
+      // Propagar el error
+      throw error;
+    }
+  } // Cierra realizarTransferencia()
 
   /* =========================================
    OBTENER MOVIMIENTOS DE UNA CUENTA

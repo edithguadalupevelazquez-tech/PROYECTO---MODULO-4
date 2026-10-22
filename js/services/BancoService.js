@@ -97,22 +97,61 @@ class BancoService {
      GUARDAR BANCO EN LOCALSTORAGE
   ========================================= */
 
+  /* =========================================
+     GUARDAR BANCO CON RECUPERACIÓN
+     Sistema de Gestión Bancaria v0.9.0
+  ========================================= */
+
   guardarBanco() {
     // Obtener la instancia actual del banco
     const banco = this.obtenerInstanciaBanco();
 
-    // Guardar usuarios
-    storageService.guardar(STORAGE_KEYS.USUARIOS, banco.usuarios);
+    // Preparar todos los datos antes de escribir
+    const nuevosDatos = [
+      [STORAGE_KEYS.USUARIOS, JSON.stringify(banco.usuarios)],
+      [STORAGE_KEYS.CUENTAS, JSON.stringify(banco.cuentas)],
+      [STORAGE_KEYS.MOVIMIENTOS, JSON.stringify(banco.movimientos)],
+    ];
 
-    // Guardar cuentas
-    storageService.guardar(STORAGE_KEYS.CUENTAS, banco.cuentas);
+    // Guardar los valores anteriores de LocalStorage
+    const respaldo = nuevosDatos.map(([clave]) => [
+      clave,
+      localStorage.getItem(clave),
+    ]);
 
-    // Guardar movimientos
-    storageService.guardar(STORAGE_KEYS.MOVIMIENTOS, banco.movimientos);
+    try {
+      // Guardar cada colección
+      for (const [clave, valor] of nuevosDatos) {
+        localStorage.setItem(clave, valor);
+      }
 
-    // Confirmar que terminó la operación
-    return true;
-  }
+      return true;
+    } catch (error) {
+      // Intentar restaurar todas las claves anteriores
+      for (const [clave, valorAnterior] of respaldo) {
+        try {
+          if (valorAnterior === null) {
+            localStorage.removeItem(clave);
+          } else {
+            localStorage.setItem(clave, valorAnterior);
+          }
+        } catch (errorRecuperacion) {
+          console.error(
+            "No fue posible restaurar la clave:",
+            clave,
+            errorRecuperacion,
+          );
+        }
+      }
+
+      // Descartar la instancia modificada
+      this._banco = null;
+
+      throw new Error("No fue posible guardar la operación bancaria.", {
+        cause: error,
+      });
+    }
+  } // Cierra guardarBanco()
 
   /* =========================================
      OBTENER DATOS BANCARIOS DEL USUARIO
@@ -177,6 +216,161 @@ class BancoService {
       totalMovimientos: movimientos.length,
     };
   }
+
+  /* =========================================
+     REALIZAR DEPÓSITO
+     Sistema de Gestión Bancaria v0.9.0
+  ========================================= */
+
+  realizarDeposito({ cuentaId, monto, descripcion = "" }) {
+    // Recuperar la instancia del banco
+    const banco = this.obtenerInstanciaBanco();
+
+    // Recuperar la sesión activa
+    const sesion = storageService.obtener(STORAGE_KEYS.SESION, null);
+
+    // Comprobar que exista una sesión
+    if (!sesion) {
+      throw new Error("Debes iniciar sesión para depositar.");
+    }
+
+    // Buscar la cuenta seleccionada
+    const cuenta = banco.buscarCuentaPorId(cuentaId);
+
+    // Comprobar que la cuenta exista
+    if (!cuenta) {
+      throw new Error("La cuenta no existe.");
+    }
+
+    // Comprobar que pertenezca al usuario autenticado
+    if (cuenta.usuarioId !== sesion.usuarioId) {
+      throw new Error("No puedes depositar en una cuenta que no te pertenece.");
+    }
+
+    // Comprobar que la cuenta esté activa
+    if (!cuenta.activa) {
+      throw new Error("La cuenta no está activa.");
+    }
+
+    /* =========================================
+       EJECUTAR DEPÓSITO CON RECUPERACIÓN
+       Sistema de Gestión Bancaria v0.9.0
+    ========================================= */
+
+    // Conservar los datos originales en memoria
+    const saldoOriginal = cuenta.saldo;
+
+    const totalMovimientosOriginal = banco.movimientos.length;
+
+    try {
+      // Ejecutar el depósito
+      const movimiento = banco.realizarDeposito({
+        cuentaId,
+        monto,
+        descripcion,
+      });
+
+      // Guardar el nuevo saldo y el movimiento
+      this.guardarBanco();
+
+      // Devolver el movimiento registrado
+      return movimiento;
+    } catch (error) {
+      // Restaurar el saldo original en memoria
+      cuenta.saldo = saldoOriginal;
+
+      // Eliminar movimientos añadidos durante el intento
+      banco.movimientos.length = totalMovimientosOriginal;
+
+      // Descartar la instancia bancaria en memoria
+      this._banco = null;
+
+      // Propagar el error
+      throw error;
+    }
+  } // Cierra realizarDeposito()
+
+  /* =========================================
+     REALIZAR TRANSFERENCIA
+     Sistema de Gestión Bancaria v0.9.0
+  ========================================= */
+
+  realizarTransferencia({
+    cuentaOrigenId,
+    numeroCuentaDestino,
+    monto,
+    descripcion = "",
+  }) {
+    // Recuperar la instancia del banco
+    const banco = this.obtenerInstanciaBanco();
+
+    // Recuperar la sesión activa
+    const sesion = storageService.obtener(STORAGE_KEYS.SESION, null);
+
+    if (!sesion) {
+      throw new Error("Debes iniciar sesión para transferir.");
+    }
+
+    // Buscar la cuenta origen
+    const cuentaOrigen = banco.buscarCuentaPorId(cuentaOrigenId);
+
+    if (!cuentaOrigen) {
+      throw new Error("La cuenta origen no existe.");
+    }
+
+    // Comprobar que pertenece al usuario autenticado
+    if (cuentaOrigen.usuarioId !== sesion.usuarioId) {
+      throw new Error(
+        "No puedes transferir desde una cuenta que no te pertenece.",
+      );
+    }
+
+    // Normalizar el número de cuenta destino
+    const numeroDestino = String(numeroCuentaDestino ?? "").replace(/\s/g, "");
+
+    // Buscar la cuenta destino por su número
+    const cuentaDestino = banco.buscarCuentaPorNumero(numeroDestino);
+
+    if (!cuentaDestino) {
+      throw new Error("La cuenta destino no existe.");
+    }
+
+    // Guardar los saldos originales
+    const saldoOriginalOrigen = cuentaOrigen.saldo;
+    const saldoOriginalDestino = cuentaDestino.saldo;
+
+    // Guardar la cantidad original de movimientos
+    const totalMovimientosOriginal = banco.movimientos.length;
+
+    try {
+      // Ejecutar las reglas bancarias
+      const resultado = banco.realizarTransferencia({
+        cuentaOrigenId,
+        cuentaDestinoId: cuentaDestino.id,
+        monto,
+        descripcion,
+      });
+
+      // Persistir los saldos y movimientos
+      this.guardarBanco();
+
+      // Devolver el resultado
+      return resultado;
+    } catch (error) {
+      // Restaurar los saldos en memoria
+      cuentaOrigen.saldo = saldoOriginalOrigen;
+      cuentaDestino.saldo = saldoOriginalDestino;
+
+      // Restaurar la cantidad original de movimientos
+      banco.movimientos.length = totalMovimientosOriginal;
+
+      // Descartar la instancia bancaria
+      this._banco = null;
+
+      // Propagar el error
+      throw error;
+    }
+  } // Cierra realizarTransferencia()
 
   /* =========================================
      ACTUALIZAR USUARIO

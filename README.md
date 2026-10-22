@@ -46,7 +46,7 @@ Durante las siguientes versiones se desarrollarán:
 
 ## Versión actual
 
-v0.8.0 — Gestión de cuenta, actualización de perfil, cambio de contraseña y eliminación de usuarios ficticios.
+v0.9.0 — Operaciones bancarias ficticias: depósitos, transferencias, validaciones monetarias y registro de movimientos.
 
 ## Modelo Banco
 
@@ -322,6 +322,60 @@ La validación de sesión en el navegador no constituye autorización segura par
 
 La recuperación de datos ante errores de almacenamiento es de mejor esfuerzo y no garantiza transacciones atómicas.
 
+## Versión v0.9.0 — Depósitos y transferencias bancarias
+
+En esta versión se implementó un módulo de operaciones bancarias ficticias que permite realizar depósitos y transferencias entre cuentas registradas.
+
+### Funcionalidades implementadas
+
+- Formulario de depósitos con selección de cuenta, monto y descripción.
+- Formulario de transferencias con cuenta origen, cuenta destino, monto y descripción.
+- Validación de importes positivos con máximo dos decimales.
+- Cálculos monetarios utilizando centavos enteros.
+- Validación de saldo suficiente y disponibilidad de cuentas.
+- Prevención de transferencias a la misma cuenta.
+- Comprobación de propiedad de la cuenta origen.
+- Confirmación de operaciones mediante SweetAlert2.
+- Protección básica contra envíos simultáneos.
+- Registro automático de movimientos bancarios.
+- Persistencia de saldos y movimientos mediante LocalStorage.
+- Recuperación de datos ante determinados errores de operación y almacenamiento.
+
+### Archivos principales
+
+- `transferencia.html`: página de operaciones bancarias.
+- `css/transferencia.css`: estilos de depósitos y transferencias.
+- `js/ui/TransferenciasUI.js`: formularios, validaciones y eventos.
+- `js/models/Banco.js`: lógica de depósitos y transferencias.
+- `js/models/Cuenta.js`: actualización de saldos mediante centavos enteros.
+- `js/services/BancoService.js`: operaciones y persistencia bancaria.
+- `js/utils/helpers.js`: utilidades de conversión monetaria.
+- `js/utils/validators.js`: validación compartida de importes.
+
+### Pruebas realizadas
+
+- Depósitos válidos e inválidos.
+- Transferencias válidas y operaciones rechazadas.
+- Rechazo de importes con más de dos decimales.
+- Validación de saldo insuficiente.
+- Comprobación de límites numéricos.
+- Recuperación ante errores simulados.
+- Persistencia integrada con almacenamiento simulado.
+- Depósito funcional desde Chrome.
+- Transferencia funcional desde Chrome.
+- Verificación de saldos y movimientos registrados.
+- Comprobación de sintaxis mediante `node --check`.
+
+### Consideraciones de seguridad
+
+Este proyecto es exclusivamente educativo y utiliza dinero ficticio.
+
+Las operaciones se simulan mediante JavaScript y LocalStorage. No existe un servidor bancario real ni autorización segura del lado del servidor.
+
+La recuperación ante errores de almacenamiento es de mejor esfuerzo y no garantiza transacciones atómicas.
+
+No deben utilizarse contraseñas reales, información bancaria auténtica ni datos financieros sensibles.
+
 ## Historial de versiones
 
 - v0.1.0 — Estructura inicial del proyecto.
@@ -332,3 +386,4 @@ La recuperación de datos ante errores de almacenamiento es de mejor esfuerzo y 
 - v0.6.0 — Registro de usuarios, autenticación, sesiones y dashboard.
 - v0.7.0 — BancoService y dashboard bancario con resumen de cuentas y movimientos.
 - v0.8.0 — Gestión de cuenta, actualización de perfil, cambio de contraseña y eliminación de usuarios ficticios.
+- v0.9.0 — Depósitos, transferencias, precisión monetaria, validaciones y persistencia de movimientos ficticios.
