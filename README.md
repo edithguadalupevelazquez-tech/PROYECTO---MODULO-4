@@ -46,7 +46,7 @@ Durante las siguientes versiones se desarrollarán:
 
 ## Versión actual
 
-v0.7.0 — BancoService y dashboard bancario con resumen de cuentas y movimientos.
+v0.8.0 — Gestión de cuenta, actualización de perfil, cambio de contraseña y eliminación de usuarios ficticios.
 
 ## Modelo Banco
 
@@ -265,6 +265,63 @@ LocalStorage no proporciona autenticación segura
 ni debe utilizarse para almacenar contraseñas reales
 o información bancaria sensible.
 
+## Versión v0.8.0 — Gestión de cuenta y seguridad
+
+En esta versión se implementó la página **Mi cuenta**, que permite consultar información bancaria y administrar los datos personales de los usuarios ficticios.
+
+### Funcionalidades implementadas
+
+- Visualización de la información de la cuenta bancaria.
+- Consulta del número de cuenta, tipo, saldo y fecha de apertura.
+- Actualización de nombre, correo electrónico y teléfono.
+- Validación de campos obligatorios y correos duplicados.
+- Cambio de contraseña ficticia.
+- Validación de la contraseña actual.
+- Confirmación de la nueva contraseña.
+- Persistencia de cambios mediante LocalStorage.
+- Eliminación de usuarios ficticios y sus cuentas bancarias.
+- Validación de saldo cero antes de permitir la eliminación.
+- Conservación de movimientos compartidos con otras cuentas.
+- Doble confirmación de eliminación mediante SweetAlert2.
+- Comprobación de que la sesión corresponde al usuario seleccionado.
+- Cierre de sesión después de una eliminación exitosa.
+
+### Archivos principales
+
+- `cuenta.html`: página Mi cuenta.
+- `js/ui/CuentaUI.js`: interfaz, formularios y eventos.
+- `js/services/BancoService.js`: actualización de usuarios, cambio de contraseña y eliminación.
+- `js/services/AuthService.js`: autenticación y gestión de sesiones.
+- `js/services/StorageService.js`: persistencia mediante LocalStorage.
+- `css/styles.css`: estilos de la interfaz.
+
+### Pruebas realizadas
+
+- Visualización de información bancaria en Chrome.
+- Actualización de datos personales.
+- Persistencia de cambios después de recargar.
+- Validación de contraseñas incorrectas.
+- Cambio exitoso de contraseña.
+- Inicio de sesión con la nueva contraseña ficticia.
+- Validación de cuentas con saldo cero.
+- Doble confirmación antes de eliminar.
+- Eliminación de un usuario ficticio desechable.
+- Conservación de los demás usuarios, cuentas y movimientos.
+- Comprobación básica de integridad de datos.
+- Verificación de sintaxis mediante `node --check`.
+
+### Consideraciones de seguridad
+
+Este proyecto es exclusivamente educativo.
+
+La autenticación y las operaciones bancarias se simulan mediante JavaScript y LocalStorage.
+
+Las contraseñas se almacenan de forma no segura para fines de aprendizaje. No deben utilizarse contraseñas reales ni información bancaria sensible.
+
+La validación de sesión en el navegador no constituye autorización segura para un sistema de producción.
+
+La recuperación de datos ante errores de almacenamiento es de mejor esfuerzo y no garantiza transacciones atómicas.
+
 ## Historial de versiones
 
 - v0.1.0 — Estructura inicial del proyecto.
@@ -274,3 +331,4 @@ o información bancaria sensible.
 - v0.5.0 — Persistencia con LocalStorage y StorageService.
 - v0.6.0 — Registro de usuarios, autenticación, sesiones y dashboard.
 - v0.7.0 — BancoService y dashboard bancario con resumen de cuentas y movimientos.
+- v0.8.0 — Gestión de cuenta, actualización de perfil, cambio de contraseña y eliminación de usuarios ficticios.
