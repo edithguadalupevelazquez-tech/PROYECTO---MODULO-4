@@ -46,7 +46,7 @@ Durante las siguientes versiones se desarrollarán:
 
 ## Versión actual
 
-v0.5.0 — Persistencia con LocalStorage y StorageService.
+v0.6.0 — Registro de usuarios, autenticación, sesiones y dashboard.
 
 ## Modelo Banco
 
@@ -115,7 +115,8 @@ El sistema utiliza las siguientes claves:
 - usuarios
 - cuentas
 - movimientos
-- sesion (reservada para versiones posteriores)
+
+- sesion: almacena el identificador del usuario autenticado y la fecha de inicio de sesión.
 
 ### Serialización
 
@@ -149,9 +150,63 @@ en las clases.
 Nota: proyecto educativo con información ficticia.
 No utilizar contraseñas reales en LocalStorage.
 
+## Versión v0.6.0 — Registro y autenticación
+
+En esta versión se implementó una interfaz de autenticación
+para el Sistema de Gestión Bancaria.
+
+### Funcionalidades implementadas
+
+- Formulario de registro de usuarios.
+- Formulario de inicio de sesión.
+- Validación de campos obligatorios.
+- Validación de contraseñas.
+- Prevención de correos electrónicos duplicados.
+- Generación automática de números de cuenta ficticios.
+- Creación de usuarios y cuentas bancarias.
+- Persistencia de datos mediante LocalStorage.
+- Inicio y cierre de sesión.
+- Dashboard con información del usuario autenticado.
+- Visualización del número de cuenta y saldo.
+- Redirección cuando no existe una sesión activa.
+- Alertas y confirmaciones con SweetAlert2.
+
+### Archivos principales
+
+- index.html: formularios de registro e inicio de sesión.
+- dashboard.html: panel del usuario autenticado.
+- css/styles.css: estilos de la interfaz.
+- js/main.js: registro, validaciones y login.
+- js/services/AuthService.js: autenticación y sesiones.
+- js/services/StorageService.js: persistencia de datos.
+- js/ui/dashboard.js: visualización del dashboard.
+- js/utils/helpers.js: generación de números de cuenta.
+
+### Pruebas realizadas
+
+- Registro exitoso de usuarios ficticios.
+- Detección de correos duplicados.
+- Validación de contraseñas.
+- Inicio de sesión con credenciales correctas.
+- Rechazo de credenciales incorrectas.
+- Persistencia de la sesión después de recargar.
+- Visualización del usuario, cuenta y saldo.
+- Cierre de sesión.
+- Redirección al login sin sesión activa.
+
+### Consideraciones de seguridad
+
+Este proyecto es exclusivamente educativo.
+
+La autenticación se simula en el navegador mediante
+LocalStorage. No debe utilizarse con contraseñas reales,
+información bancaria auténtica ni en producción.
+
 ## Historial de versiones
 
 - v0.1.0 — Estructura inicial del proyecto.
 - v0.2.0 — Arquitectura modular y utilidades base.
 - v0.3.0 — Modelos Usuario, Cuenta y Movimiento.
 - v0.4.0 — Modelo Banco y reglas del dominio bancario.
+- v0.5.0 — Persistencia con LocalStorage y StorageService.
+- v0.6.0 — Registro de usuarios, autenticación, sesiones y dashboard.
