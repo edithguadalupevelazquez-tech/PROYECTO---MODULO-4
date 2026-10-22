@@ -1,42 +1,64 @@
+
 <!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
 
     <title>Dashboard - Sistema de Gestión Bancaria</title>
 
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
 
-  <body class="dashboard-page">
-    <main class="dashboard-simple">
-      <h1>Mi banca digital</h1>
+  <body class="app-dashboard">
 
-      <p>
-        Bienvenido,
-        <strong id="nombreUsuario">Usuario</strong>
-      </p>
+    <!-- BARRA SUPERIOR -->
+    <header class="topbar">
+      <div>
+        <h1>Banco Digital</h1>
+        <p>Sistema de Gestión Bancaria</p>
+      </div>
 
-      <h2>Mi cuenta bancaria</h2>
-
-      <p>
-        Número de cuenta:
-        <strong id="numeroCuenta">---</strong>
-      </p>
-
-      <p>
-        Saldo disponible:
-        <strong id="saldoCuenta">$0.00</strong>
-      </p>
-
-      <button type="button" id="btnCerrarSesion" class="btn btn-primary">
+      <button
+        type="button"
+        id="btnCerrarSesion"
+        class="btn btn-secondary"
+      >
         Cerrar sesión
       </button>
-    </main>
+    </header>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- NAVEGACIÓN -->
+    <nav class="dashboard-nav">
+      <a href="./dashboard.html" class="active">
+        Dashboard
+      </a>
 
-    <script type="module" src="./js/ui/dashboard.js"></script>
+      <span>Mi cuenta (próximamente)</span>
+      <span>Movimientos (próximamente)</span>
+      <span>Transferencias (próximamente)</span>
+    </nav>
+
+    <!-- CONTENIDO DINÁMICO -->
+    <main
+      class="dashboard-content"
+      id="dashboardRoot"
+    ></main>
+
+    <!-- SWEETALERT2 -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+    ></script>
+
+    <!-- JAVASCRIPT DEL DASHBOARD -->
+    <script
+      type="module"
+      src="./js/ui/DashboardUI.js"
+    ></script>
+
   </body>
 </html>

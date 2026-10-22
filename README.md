@@ -46,7 +46,7 @@ Durante las siguientes versiones se desarrollarán:
 
 ## Versión actual
 
-v0.6.0 — Registro de usuarios, autenticación, sesiones y dashboard.
+v0.7.0 — BancoService y dashboard bancario con resumen de cuentas y movimientos.
 
 ## Modelo Banco
 
@@ -202,6 +202,69 @@ La autenticación se simula en el navegador mediante
 LocalStorage. No debe utilizarse con contraseñas reales,
 información bancaria auténtica ni en producción.
 
+## Versión v0.7.0 — Servicio bancario y dashboard
+
+En esta versión se implementó BancoService para
+centralizar la consulta y administración de los datos
+bancarios del sistema.
+
+### BancoService
+
+Archivo: js/services/BancoService.js
+
+Métodos implementados:
+
+- cargarBanco(): recupera los datos de LocalStorage y reconstruye las instancias de los modelos bancarios.
+- obtenerInstanciaBanco(): devuelve el banco actual.
+- recargarBanco(): actualiza la instancia desde LocalStorage.
+- guardarBanco(): guarda usuarios, cuentas y movimientos.
+- obtenerDatosUsuario(): consulta los datos bancarios de un usuario específico.
+- obtenerResumenUsuario(): calcula el resumen bancario de un usuario.
+
+### Dashboard bancario
+
+Archivos principales:
+
+- dashboard.html
+- js/ui/DashboardUI.js
+- css/styles.css
+
+El dashboard muestra:
+
+- Nombre del usuario autenticado.
+- Saldo total de sus cuentas.
+- Cantidad de cuentas bancarias.
+- Cantidad de movimientos.
+- Número de cuenta principal.
+- Tipo de cuenta.
+- Saldo disponible.
+
+### Arquitectura
+
+El dashboard utiliza AuthService para identificar
+al usuario autenticado y BancoService para consultar
+su información bancaria.
+
+StorageService administra la persistencia en LocalStorage.
+
+### Pruebas realizadas
+
+- Recuperación de usuarios, cuentas y movimientos.
+- Reconstrucción de instancias de Banco y Cuenta.
+- Consulta del resumen bancario de un usuario.
+- Visualización del dashboard en Chrome.
+- Cierre de sesión.
+- Conservación de los datos después de recargar.
+- Conservación de usuarios y cuentas al cerrar sesión.
+
+### Consideraciones de seguridad
+
+Este proyecto es una simulación educativa.
+
+LocalStorage no proporciona autenticación segura
+ni debe utilizarse para almacenar contraseñas reales
+o información bancaria sensible.
+
 ## Historial de versiones
 
 - v0.1.0 — Estructura inicial del proyecto.
@@ -210,3 +273,4 @@ información bancaria auténtica ni en producción.
 - v0.4.0 — Modelo Banco y reglas del dominio bancario.
 - v0.5.0 — Persistencia con LocalStorage y StorageService.
 - v0.6.0 — Registro de usuarios, autenticación, sesiones y dashboard.
+- v0.7.0 — BancoService y dashboard bancario con resumen de cuentas y movimientos.
