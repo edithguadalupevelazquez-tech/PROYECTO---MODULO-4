@@ -377,14 +377,32 @@ export class Banco {
   } // Cierra realizarTransferencia()
 
   /* =========================================
-   OBTENER MOVIMIENTOS DE UNA CUENTA
-========================================= */
+     OBTENER MOVIMIENTOS DE UNA CUENTA
+     Sistema de Gestión Bancaria v0.10.0
+  ========================================= */
 
   obtenerMovimientosDeCuenta(cuentaId) {
-    return this.movimientos.filter(
-      (movimiento) =>
+    return this.movimientos.filter((movimiento) => {
+      // Los depósitos pertenecen a la cuenta registrada
+      if (movimiento.tipo === "DEPOSITO") {
+        return movimiento.cuentaOrigen === cuentaId;
+      }
+
+      // Mostrar transferencias enviadas al emisor
+      if (movimiento.tipo === "TRANSFERENCIA_ENVIADA") {
+        return movimiento.cuentaOrigen === cuentaId;
+      }
+
+      // Mostrar transferencias recibidas al receptor
+      if (movimiento.tipo === "TRANSFERENCIA_RECIBIDA") {
+        return movimiento.cuentaDestino === cuentaId;
+      }
+
+      // Conservar compatibilidad con otros tipos de movimientos
+      return (
         movimiento.cuentaOrigen === cuentaId ||
-        movimiento.cuentaDestino === cuentaId,
-    );
+        movimiento.cuentaDestino === cuentaId
+      );
+    });
   }
 }

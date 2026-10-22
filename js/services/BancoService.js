@@ -168,20 +168,37 @@ class BancoService {
     if (!usuario) {
       throw new Error("El usuario no existe.");
     }
-
-    // Recuperar las cuentas del usuario
+    // Recuperar las cuentas pertenecientes al usuario
     const cuentas = banco.obtenerCuentasDeUsuario(usuarioId);
 
-    // Recuperar movimientos de todas sus cuentas
-    const movimientosSinFiltrar = cuentas.flatMap((cuenta) =>
-      banco.obtenerMovimientosDeCuenta(cuenta.id),
-    );
+    /* =========================================
+       FILTRAR MOVIMIENTOS POR USUARIO
+       Sistema de Gestión Bancaria v0.10.0
+    ========================================= */
 
-    // Evitar movimientos duplicados
-    const movimientos = movimientosSinFiltrar.filter(
-      (movimiento, index, array) =>
-        index === array.findIndex((item) => item.id === movimiento.id),
-    );
+    // Obtener los identificadores de las cuentas del usuario
+    const cuentasIds = cuentas.map((cuenta) => cuenta.id);
+
+    // Recuperar únicamente los movimientos que le pertenecen
+    const movimientos = banco.movimientos.filter((movimiento) => {
+      // Depósitos realizados en sus cuentas
+      if (movimiento.tipo === "DEPOSITO") {
+        return cuentasIds.includes(movimiento.cuentaOrigen);
+      }
+
+      // Transferencias enviadas desde sus cuentas
+      if (movimiento.tipo === "TRANSFERENCIA_ENVIADA") {
+        return cuentasIds.includes(movimiento.cuentaOrigen);
+      }
+
+      // Transferencias recibidas en sus cuentas
+      if (movimiento.tipo === "TRANSFERENCIA_RECIBIDA") {
+        return cuentasIds.includes(movimiento.cuentaDestino);
+      }
+
+      // Excluir otros tipos no contemplados
+      return false;
+    });
 
     // Devolver la información encontrada
     return {
@@ -216,6 +233,63 @@ class BancoService {
       totalMovimientos: movimientos.length,
     };
   }
+
+  /* =========================================
+     CONSULTAR MOVIMIENTOS DEL USUARIO
+     Sistema de Gestión Bancaria v0.10.0
+  ========================================= */
+
+  obtenerMovimientosUsuario(usuarioId, tipo = "TODOS") {
+    // Recuperar los movimientos del usuario
+    const { movimientos } = this.obtenerDatosUsuario(usuarioId);
+
+    // Crear una copia del arreglo original
+    let resultado = [...movimientos];
+
+    // Aplicar filtro por tipo
+    if (tipo !== "TODOS") {
+      resultado = resultado.filter((movimiento) => movimiento.tipo === tipo);
+    }
+
+    // Ordenar del más reciente al más antiguo
+    resultado.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+    // Devolver el resultado
+    return resultado;
+  } // Cierra obtenerMovimientosUsuario()
+
+  /* =========================================
+     OBTENER RESUMEN DE MOVIMIENTOS
+     Sistema de Gestión Bancaria v0.10.0
+  ========================================= */
+
+  obtenerResumenMovimientos(usuarioId) {
+    // Recuperar todos los movimientos del usuario
+    const movimientos = this.obtenerMovimientosUsuario(usuarioId);
+
+    // Contar los depósitos
+    const depositos = movimientos.filter(
+      (movimiento) => movimiento.tipo === "DEPOSITO",
+    ).length;
+
+    // Contar las transferencias enviadas
+    const enviadas = movimientos.filter(
+      (movimiento) => movimiento.tipo === "TRANSFERENCIA_ENVIADA",
+    ).length;
+
+    // Contar las transferencias recibidas
+    const recibidas = movimientos.filter(
+      (movimiento) => movimiento.tipo === "TRANSFERENCIA_RECIBIDA",
+    ).length;
+
+    // Devolver el resumen
+    return {
+      total: movimientos.length,
+      depositos,
+      enviadas,
+      recibidas,
+    };
+  } // Cierra obtenerResumenMovimientos()
 
   /* =========================================
      REALIZAR DEPÓSITO
@@ -388,6 +462,8 @@ class BancoService {
     if (!usuario) {
       throw new Error("El usuario no existe.");
     }
+    // Recuperar las cuentas pertenecientes al usuario
+    const cuentas = banco.obtenerCuentasDeUsuario(usuarioId);
 
     /* =========================================
        NORMALIZAR CORREO ELECTRÓNICO

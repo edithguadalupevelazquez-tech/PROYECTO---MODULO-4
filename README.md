@@ -46,7 +46,7 @@ Durante las siguientes versiones se desarrollarán:
 
 ## Versión actual
 
-v0.9.0 — Operaciones bancarias ficticias: depósitos, transferencias, validaciones monetarias y registro de movimientos.
+v0.10.0 — Sistema bancario integrado con depósitos, transferencias, historial de movimientos, filtros interactivos y consulta de información por usuario.
 
 ## Modelo Banco
 
@@ -376,6 +376,55 @@ La recuperación ante errores de almacenamiento es de mejor esfuerzo y no garant
 
 No deben utilizarse contraseñas reales, información bancaria auténtica ni datos financieros sensibles.
 
+## Versión v0.10.0 — Historial de movimientos y filtros
+
+En esta versión se integró un historial de movimientos bancarios ficticios que permite consultar depósitos y transferencias desde la perspectiva de cada usuario autenticado.
+
+### Funcionalidades implementadas
+
+- Consulta de movimientos asociados a las cuentas del usuario.
+- Separación de depósitos, transferencias enviadas y transferencias recibidas.
+- Ordenamiento de movimientos por fecha, del más reciente al más antiguo.
+- Resumen con cantidades por categoría.
+- Tabla de historial con fecha, tipo, descripción, monto y saldo resultante.
+- Filtros interactivos: Todos, Depósitos, Enviadas y Recibidas.
+- Actualización de la tabla sin recargar la página.
+- Mensaje cuando no existen movimientos para el filtro seleccionado.
+- Protección de acceso mediante la sesión del usuario.
+- Presentación adaptable a diferentes tamaños de pantalla.
+- Protección del texto de las descripciones antes de incorporarlo al HTML.
+
+### Archivos principales
+
+- `movimientos.html`: página del historial bancario.
+- `css/movimientos.css`: estilos del historial, tarjetas, filtros y tabla.
+- `js/ui/MovimientosUI.js`: renderizado, filtros e inicialización.
+- `js/models/Banco.js`: consulta de movimientos por cuenta.
+- `js/services/BancoService.js`: consulta, filtrado, ordenamiento y resumen de movimientos.
+
+### Pruebas realizadas
+
+- Verificación de sintaxis mediante `node --check`.
+- Consulta y filtrado de movimientos con dos usuarios simulados.
+- Inicialización del historial en Chrome.
+- Comprobación de las cuatro tarjetas de resumen.
+- Prueba de los cuatro filtros interactivos.
+- Comprobación del mensaje de historial vacío.
+- Verificación de depósitos y transferencias enviadas de María García Prueba.
+- Verificación de depósitos y transferencias recibidas de Ana López.
+- Comprobación de saldos resultantes y asociación de movimientos con sus cuentas.
+- Revisión de cambios mediante `git diff --check`.
+
+### Consideraciones de seguridad
+
+Este proyecto es exclusivamente educativo y utiliza dinero ficticio.
+
+La información se almacena en LocalStorage y la autenticación se realiza en el navegador. No existe un servidor bancario real ni controles de autorización seguros del lado del servidor.
+
+El historial filtra los movimientos según las cuentas del usuario autenticado, pero esta separación no constituye un mecanismo de seguridad adecuado para un entorno bancario real.
+
+No deben utilizarse contraseñas reales ni información financiera sensible.
+
 ## Historial de versiones
 
 - v0.1.0 — Estructura inicial del proyecto.
@@ -387,3 +436,4 @@ No deben utilizarse contraseñas reales, información bancaria auténtica ni dat
 - v0.7.0 — BancoService y dashboard bancario con resumen de cuentas y movimientos.
 - v0.8.0 — Gestión de cuenta, actualización de perfil, cambio de contraseña y eliminación de usuarios ficticios.
 - v0.9.0 — Depósitos, transferencias, precisión monetaria, validaciones y persistencia de movimientos ficticios.
+- v0.10.0 — Historial bancario, filtros interactivos, resumen de movimientos y perspectiva de dos usuarios.

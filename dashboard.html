@@ -1,13 +1,9 @@
-
 <!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
 
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Dashboard - Sistema de Gestión Bancaria</title>
 
@@ -15,7 +11,6 @@
   </head>
 
   <body class="app-dashboard">
-
     <!-- BARRA SUPERIOR -->
     <header class="topbar">
       <div>
@@ -23,42 +18,35 @@
         <p>Sistema de Gestión Bancaria</p>
       </div>
 
-      <button
-        type="button"
-        id="btnCerrarSesion"
-        class="btn btn-secondary"
-      >
+      <button type="button" id="btnCerrarSesion" class="btn btn-secondary">
         Cerrar sesión
       </button>
     </header>
 
-    <!-- NAVEGACIÓN -->
+    <!-- =========================================
+     NAVEGACIÓN
+     Sistema de Gestión Bancaria v0.10.0
+========================================= -->
+
     <nav class="dashboard-nav">
-      <a href="./dashboard.html" class="active">
+      <a href="./dashboard.html" class="active" aria-current="page">
         Dashboard
       </a>
 
-      <span>Mi cuenta (próximamente)</span>
-      <span>Movimientos (próximamente)</span>
-      <span>Transferencias (próximamente)</span>
+      <a href="./cuenta.html"> Mi cuenta </a>
+
+      <a href="./movimientos.html"> Movimientos </a>
+
+      <a href="./transferencia.html"> Transferencias </a>
     </nav>
 
     <!-- CONTENIDO DINÁMICO -->
-    <main
-      class="dashboard-content"
-      id="dashboardRoot"
-    ></main>
+    <main class="dashboard-content" id="dashboardRoot"></main>
 
     <!-- SWEETALERT2 -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- JAVASCRIPT DEL DASHBOARD -->
-    <script
-      type="module"
-      src="./js/ui/DashboardUI.js"
-    ></script>
-
+    <script type="module" src="./js/ui/DashboardUI.js"></script>
   </body>
 </html>
